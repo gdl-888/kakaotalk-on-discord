@@ -115,7 +115,7 @@ async function run() {
 							while(!guild) {
 								var num = Number(await (input('카카오톡 서버(만드려면 0): ')));
 								guild = bridge.guilds.array()[num - 1];
-								if(!guild && num) print(' *** 번호 똑바로 쓰세요 *** ');
+								if(!guild && num) print(' *** 번호가 올바르지 않습니다 *** ');
 								else if(!num) try {
 									guild = await (bridge.user.createGuild(await (input('서버 이름(기본값-카카오톡 서버): ')) || '카카오톡 서버'));
 									var ch = guild.channels.find(ch => ch.type == 'text');
