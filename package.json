@@ -1,0 +1,25 @@
+{
+  "name": "discord-kakao",
+  "version": "1.0.0",
+  "description": "디스코드에서 카카오톡 사용",
+  "main": "index.js",
+  "dependencies": {
+    "discord.js": "^11.6.3",
+    "md5": "^2.3.0",
+    "node-kakao": "^3.1.10"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gdl-888/kakaotalk-on-discord.git"
+  },
+  "author": "",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/gdl-888/kakaotalk-on-discord/issues"
+  },
+  "homepage": "https://github.com/gdl-888/kakaotalk-on-discord#readme"
+}
