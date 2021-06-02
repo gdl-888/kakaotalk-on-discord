@@ -105,7 +105,7 @@ async function run() {
 		client.login(email, password, true)
 			.then(async r => {
 				print('로그인 됨');
-				if(!config.token) config.token = await (input('봇 토큰: ')), commits;
+				if(!config.token) config.token = await (input('디스코드 봇 토큰: ')), commits;
 				bridge.login(config.token)
 					.then(async() => {
 						if(!config.guild) {
@@ -397,7 +397,7 @@ async function setup() {
 	function randomUUID() {
 		var ret = '';
 		for(var i=0; i<86; i++)
-			ret += 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/'[Math.floor(Math.random() * 64)];
+			ret += 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+	/'[Math.floor(Math.random() * 64)];
 		return ret + '==';
 	}
 	
