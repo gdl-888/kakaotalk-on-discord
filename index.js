@@ -245,11 +245,11 @@ async function run() {
 							
 							bridge.rest.makeRequest('post', '/channels/' + webhook(msg.channel.id).channelID + '/messages', true, {
 								content: channel.getUserInfo(reader).memberStruct.nickname + '님이 ' + time() + '분에 ' + channel.getUserInfo(msg.sender).memberStruct.nickname + '님의 메시지를 읽었습니다', 
-								message_reference: {
+								message_reference: dmsg ? ({
 									message_id: dmsg.id,
 									channel_id: dmsg.channel.id,
 									guild_id:   dmsg.guild.id
-								}, allowed_mentions: {
+								}) : undefined, allowed_mentions: {
 									parse: ["users", "roles", "everyone"],
 									replied_user: false,
 								},
@@ -257,9 +257,10 @@ async function run() {
 						});
 						
 						client.on('message_deleted', async feed => {
+							const channel = feed.channel;
+							
 							await (setupWebhook({ channel }));
 							
-							const channel = feed.channel;
 							const sender = channel.getUserInfo(feed.sender).memberStruct;
 							const msgID = (feed.text.match(/["]logId["][:](\d+)/) || [])[1] || '-1';
 							const msg = chats.get(msgID);
@@ -355,6 +356,11 @@ async function run() {
 									var cntnt = r => (r || '') + msg.content;
 									var ref = null;
 									var reply = '';
+									
+									function proc(msg) {
+										if(msg.text.startsWith('*')) read.set(msg.logId + '', msg);
+									}
+									
 									if(msg.reference) {
 										try {
 											ref = await (msg.channel.fetchMessage(msg.reference.messageID));
@@ -364,8 +370,8 @@ async function run() {
 										var fc = ref.content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n/g, '[줄바꿈]').replace(/[(]/g, '[괄호열고]').replace(/[)]/g, '[괄호닫고]'), _fc = fc;
 										if(fc.length > 15) fc = fc.slice(0, 15) + '...';
 										reply = (ref ? (ref.author.username + '에게 답장 ' + fc + '\n--------\n') : '');
-										client.channelManager.get(whi).sendText(cntnt(reply));
-									} else client.channelManager.get(whi).sendText(cntnt(reply));
+										client.channelManager.get(whi).sendText(cntnt(reply)).then(proc);
+									} else client.channelManager.get(whi).sendText(cntnt(reply)).then(proc);
 									break;
 								}
 							}
