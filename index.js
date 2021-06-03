@@ -205,14 +205,63 @@ async function run() {
 							}
 						}
 						
+						function parseDate(d) {
+							var date = new Date(d);
+							var ret = '';
+							ret += date.getFullYear() + '년 ';
+							ret += date.getMonth() + 1 + '월 ';
+							ret += date.getDate() + '일 ';
+							const hr = date.getHours();
+							if(hr > 12) ret += '오후';
+							else ret += '오전';
+							ret += ' ';
+							ret += (hr > 12 ? hr - 12 : hr) + ':';
+							var m = date.getMinutes();
+							ret += (m < 10 ? '0' + m : m);
+							
+							return ret;
+						}
+						
 						client.on('message', async msg => {
 							var chname = channelName(msg.channel);
 							if(currentChannelName != chname) print('\n[' + chname + ']');
 							currentChannelName = chname;
 							
+							var att = '';
+							if(msg.rawAttachment && msg.rawAttachment.os) {
+								var data = msg.rawAttachment.os;
+								if(data[0].t == 3 && !data[0].its && !data[0].st && !data[0].t && !data[0].tt) {
+									att += '-\\*- 게시판 공지 -\\*-\n';
+									if(data[1].ct) att += '[내용]\n' + data[1].ct;
+								} else if(data[0].t == 9) {
+									att += '-\\*- 게시판 투표 -\\*-\n';
+									if(data[0].tt) att += '[제목]\n' + data[0].tt;
+									if(data[0].its) {
+										att += '\n\n[투표 항목]\n';
+										var i = 1;
+										for(var item of data[0].its) {
+											att += ' (' + i++ + ') ' + item.tt + '\n';
+										}
+									}
+								} else if(data[0].t == 8) {
+									att += '-\\*- 게시판 일정 -\\*-\n';
+									if(data[0].tt) att += '[제목]\n' + data[0].tt;
+									if(data[0].stAt && data[0].edAt) {
+										att += '\n\n[시간]\n';
+										att += ' - 시작: ' + parseDate(data[0].stAt * 1000) + '\n';
+										att += ' - 종료: ' + parseDate(data[0].edAt * 1000) + '\n';
+									}
+									if(data[0].alAt)
+										att += ' - 알림: ' + parseDate(data[0].edAt * 1000) + '\n';
+									if(data[0].loc)
+										att += '\n\n[위치]\n' + data[0].loc;
+								}
+							}
+							print(msg.rawAttachment.title, msg.rawAttachment.os) 
+							
 							const chat = msg;
 							const sender = msg.channel.getUserInfo(msg.sender).memberStruct;
-							print((sender.nickname) + ': ' + msg.text);
+							print(((sender || { nickname: '나' }).nickname) + ': ' + msg.text);
 							
 							await (setupWebhook(msg));
 							
@@ -224,9 +273,9 @@ async function run() {
 								msg.text += '\n[첨부파일 ' + ++i + (item.Name ? (' ' + item.Name) : '') + ': ' + (item.ImageURL || item.VideoURL || item.FileURL) + ' ]';
 							}
 							
-							webhook(msg.channel.id).send(msg.text, {
-								username: sender.nickname,
-								avatarURL: 'https://secure.gravatar.com/avatar/' + md5(sender.nickname) + '?d=retro',
+							webhook(msg.channel.id).send(att || msg.text, {
+								username: (sender || { nickname: '나' }).nickname,
+								avatarURL: 'https://secure.gravatar.com/avatar/' + md5((sender || { nickname: '' }).nickname) + '?d=retro',
 							}).then(msg => messages.set(chat.logId + '', msg));
 						});
 						
